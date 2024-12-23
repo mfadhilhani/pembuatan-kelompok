@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Group Divider</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        .group {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mb-4">
+            <label for="language" class="form-label">Select Language / Pilih Bahasa:</label>
+            <select id="language" class="form-select" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="id">Bahasa Indonesia</option>
+            </select>
+        </div>
+
+        <h1 id="title" class="text-center">Random Group Divider</h1>
+
+        <div class="mb-3">
+            <label for="groupSize" id="groupSizeLabel" class="form-label">Number of people per group:</label>
+            <input type="number" id="groupSize" class="form-control" min="2" placeholder="Enter group size">
+        </div>
+
+        <h2 id="enterNamesTitle" class="mt-4">Enter Names</h2>
+
+        <div class="mb-3">
+            <label for="maleNames" id="maleNamesLabel" class="form-label">Male Names (one per line):</label>
+            <textarea id="maleNames" class="form-control" rows="5" placeholder="Enter male names"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="femaleNames" id="femaleNamesLabel" class="form-label">Female Names (one per line):</label>
+            <textarea id="femaleNames" class="form-control" rows="5" placeholder="Enter female names"></textarea>
+        </div>
+
+        <button onclick="generateGroups()" id="generateButton" class="btn btn-primary w-100">Generate Groups</button>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                title: "Random Group Divider",
+                groupSizeLabel: "Number of people per group:",
+                enterNamesTitle: "Enter Names",
+                maleNamesLabel: "Male Names (one per line):",
+                femaleNamesLabel: "Female Names (one per line):",
+                generateButton: "Generate Groups"
+            },
+            id: {
+                title: "Pembagi Kelompok Acak",
+                groupSizeLabel: "Jumlah orang per kelompok:",
+                enterNamesTitle: "Masukkan Nama",
+                maleNamesLabel: "Nama Laki-Laki (satu per baris):",
+                femaleNamesLabel: "Nama Perempuan (satu per baris):",
+                generateButton: "Buat Kelompok"
+            }
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById('language').value;
+            document.getElementById('title').textContent = translations[lang].title;
+            document.getElementById('groupSizeLabel').textContent = translations[lang].groupSizeLabel;
+            document.getElementById('enterNamesTitle').textContent = translations[lang].enterNamesTitle;
+            document.getElementById('maleNamesLabel').textContent = translations[lang].maleNamesLabel;
+            document.getElementById('femaleNamesLabel').textContent = translations[lang].femaleNamesLabel;
+            document.getElementById('generateButton').textContent = translations[lang].generateButton;
+        }
+
+        function generateGroups() {
+            const groupSize = parseInt(document.getElementById('groupSize').value);
+            const maleNames = document.getElementById('maleNames').value.split('\n').filter(name => name.trim() !== '');
+            const femaleNames = document.getElementById('femaleNames').value.split('\n').filter(name => name.trim() !== '');
+
+            if (!groupSize || groupSize < 2) {
+                alert('Please enter a valid group size.');
+                return;
+            }
+
+            if (maleNames.length === 0 || femaleNames.length === 0) {
+                alert('Please enter names in both male and female lists.');
+                return;
+            }
+
+            if (groupSize % 2 !== 0) {
+                alert('Please enter an even group size for balanced groups.');
+                return;
+            }
+
+            // Shuffle arrays
+            maleNames.sort(() => Math.random() - 0.5);
+            femaleNames.sort(() => Math.random() - 0.5);
+
+            const numGroups = Math.ceil((maleNames.length + femaleNames.length) / groupSize);
+            const groups = Array.from({ length: numGroups }, () => []);
+
+            let maleIndex = 0;
+            let femaleIndex = 0;
+
+            // Distribute evenly between groups
+            for (let i = 0; i < numGroups * groupSize; i++) {
+                const group = groups[i % numGroups];
+
+                if (group.length < groupSize / 2 && maleIndex < maleNames.length) {
+                    group.push(maleNames[maleIndex++]);
+                } else if (group.length < groupSize && femaleIndex < femaleNames.length) {
+                    group.push(femaleNames[femaleIndex++]);
+                } else if (maleIndex < maleNames.length) {
+                    group.push(maleNames[maleIndex++]);
+                } else if (femaleIndex < femaleNames.length) {
+                    group.push(femaleNames[femaleIndex++]);
+                }
+            }
+
+            // Display groups
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+            groups.forEach((group, index) => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'group';
+                groupDiv.innerHTML = `<strong>Group ${index + 1}:</strong> ${group.join(', ')}`;
+                resultDiv.appendChild(groupDiv);
+            });
+        }
+
+        // Initialize language
+        changeLanguage();
+    </script>
+</body>
+</html>
